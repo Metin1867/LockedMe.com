@@ -2,39 +2,110 @@ package tr.com.macik.lockedme;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import tr.com.macik.tools.Log;
 import tr.com.macik.tools.UserConsoleInput;
 
 public class LockedMeApp {
-	private HashMap<Character, String> menuMap = new HashMap<>();
+	private HashMap<Character, String> menuMap = new LinkedHashMap<>();
 	private UserConsoleInput userInput = new UserConsoleInput();
 	private int screenWidth = 80;
+	private int menuLevel = 0;
 	
 	public static void main(String[] args) {
 		Log.debug = true;
 		LockedMeApp app = new LockedMeApp();
 		app.welcomeScreen();
-		app.nl();
-		app.showMenu();
-		app.userInput();
-
+		while(true) {
+			try {
+				app.nl();
+				app.setMenu(app.menuLevel);
+				String choice = app.userInput.getChoice(app.menuMap);
+				if (app.menuLevel==0) {
+					switch (choice) {
+					case "1":
+						reportFiles();	break;
+					case "2":
+						app.menuLevel = 2;	break;
+					case "x":
+						break;
+					default:
+						
+					}
+					if ("x".equals(choice))
+						break;
+				} else if (app.menuLevel==2) {
+					switch (choice) {
+					case "1":
+						addFile();	break;
+					case "2":
+						deleteFile();	break;
+					case "3":
+						searchFile();	break;
+					case "r":
+						app.menuLevel=0; break;
+					default:
+						
+					}
+					
+				}
+			} catch (Exception e) {
+				// Try to catch all exceptions if possible and 
+				// provide a message to the user
+				e.printStackTrace();
+			}
+		}
+		
+		System.out.println("Application is finished.");
 		System.exit(0);
 
 	}
 
-	private void userInput() {
+	private static void searchFile() {
+		// TODO Auto-generated method stub
+		System.out.println("Search a file with given file name.");
+	}
+
+	private static void deleteFile() {
+		// TODO Auto-generated method stub
+		System.out.println("Delete a file with given file name.");
+	}
+
+	private static void addFile() {
+		// TODO Auto-generated method stub
+		System.out.println("Add a file with given file name.");
+	}
+
+	private static void reportFiles() {
+		// TODO Auto-generated method stub
+		System.out.println("Report files in ascending order.");
+	}
+
+	/*private UserConsoleInput userInput() {
 		// TODO Auto-generated method stub
 		System.out.println("Eingabe? ");
 		
-	}
+	}*/
 
-	private void showMenu() {
-		// TODO Auto-generated method stub
-		System.out.println("1: report files");
-		System.out.println("2: business operations");
-		System.out.println("3: close");
-		
+	private void setMenu(int level) {
+		switch(level) {
+		case 0: 
+			menuMap.clear();
+			menuMap.put('1', "Report Files");
+			menuMap.put('2', "Business Operations");
+			menuMap.put('x', "Exit");
+			break;
+		case 2: 
+			menuMap.clear();
+			menuMap.put('1', "Add File");
+			menuMap.put('2', "Delete File");
+			menuMap.put('3', "Search File");
+			menuMap.put('r', "Return");
+			break;
+		default:
+			throw new RuntimeException("Menu not available!");
+		}
 	}
 
 	private void welcomeScreen() {
