@@ -3,6 +3,7 @@ package tr.com.macik.lockedme;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import tr.com.macik.tools.FileOp;
 import tr.com.macik.tools.Log;
@@ -72,10 +73,23 @@ public class LockedMeApp {
 	}
 
 	private static void searchFile(String filename) {
-		// TODO Auto-generated method stub
 		System.out.println("Search a file with given file name.");
 		if (file.search(filename)) {
 			System.out.println("File found!");
+			boolean yes = userInput.getDecision("Do you will see the file content?");
+			if (yes) {
+				List<String> content = file.getContent(filename);
+				StringBuilder sb = new StringBuilder();
+				for(String line : content) {
+					if (!(line == null || "".equals(line) || "\n".equals(line))) {
+						sb.append(line);
+						sb.append('\n');
+					}
+				}
+				System.out.println("____________________________________________________________________________________________________");
+				System.out.print(sb);
+				System.out.println("____________________________________________________________________________________________________");
+			}
 		} else {
 			System.out.println("File not found!");			
 		};
