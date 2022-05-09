@@ -82,9 +82,14 @@ public class LockedMeApp {
 	}
 
 	private static void deleteFile(String filename) {
-		// TODO Auto-generated method stub
 		System.out.println("Delete a file with given file name.");
-		file.delete(filename);
+		if (file.exist(filename)) {
+			boolean yes = userInput.getDecision("Are you sure?");
+			if (yes)
+				file.delete(filename);
+		} else {
+			System.out.println("Given file name doesn't exists.");			
+		}
 	}
 
 	private static void addFile(String filename) {
