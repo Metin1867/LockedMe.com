@@ -4,19 +4,24 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import tr.com.macik.tools.FileOp;
 import tr.com.macik.tools.Log;
 import tr.com.macik.tools.UserConsoleInput;
 
 public class LockedMeApp {
 	private HashMap<Character, String> menuMap = new LinkedHashMap<>();
-	private UserConsoleInput userInput = new UserConsoleInput();
+	private static UserConsoleInput userInput = new UserConsoleInput();
 	private int screenWidth = 80;
 	private int menuLevel = 0;
+	private static FileOp file;
+	
 	
 	public static void main(String[] args) {
+		String directory = "C:\\Dev\\workspace\\java\\LockedMe.com\\data";
 		Log.debug = true;
 		LockedMeApp app = new LockedMeApp();
 		app.welcomeScreen();
+		file = new FileOp(directory);
 		while(true) {
 			try {
 				app.nl();
@@ -36,13 +41,17 @@ public class LockedMeApp {
 					if ("x".equals(choice))
 						break;
 				} else if (app.menuLevel==2) {
+					String filename;
 					switch (choice) {
 					case "1":
-						addFile();	break;
+						filename = app.userInput.getText("New filename");
+						addFile(filename);	break;
 					case "2":
-						deleteFile();	break;
+						filename = app.userInput.getText("Filename to delete");
+						deleteFile(filename);	break;
 					case "3":
-						searchFile();	break;
+						filename = app.userInput.getText("Search filename");
+						searchFile(filename);	break;
 					case "r":
 						app.menuLevel=0; break;
 					default:
@@ -62,19 +71,40 @@ public class LockedMeApp {
 
 	}
 
-	private static void searchFile() {
+	private static void searchFile(String filename) {
 		// TODO Auto-generated method stub
 		System.out.println("Search a file with given file name.");
+		if (file.search(filename)) {
+			System.out.println("File found!");
+		} else {
+			System.out.println("File not found!");			
+		};
 	}
 
-	private static void deleteFile() {
+	private static void deleteFile(String filename) {
 		// TODO Auto-generated method stub
 		System.out.println("Delete a file with given file name.");
+		file.delete(filename);
 	}
 
-	private static void addFile() {
-		// TODO Auto-generated method stub
+	private static void addFile(String filename) {
 		System.out.println("Add a file with given file name.");
+		if (!file.exist(filename))
+			file.touch(filename);
+		boolean yes = userInput.getDecision("Would you append some text?");
+		if (yes) {
+			StringBuilder sb = new StringBuilder();
+			String line="start";
+			while (true) {
+				line = userInput.getText("Line");
+				if (line.equals(""))
+					break;
+				sb.append(line);
+				sb.append('\n');
+			};
+			if (sb.length()>0)
+				file.append(filename, sb.toString());
+		}
 	}
 
 	private static void reportFiles() {
