@@ -45,13 +45,13 @@ public class LockedMeApp {
 					String filename;
 					switch (choice) {
 					case "1":
-						filename = app.userInput.getText("New filename");
+						filename = app.retrieveFilename("New filename");
 						addFile(filename);	break;
 					case "2":
-						filename = app.userInput.getText("Filename to delete");
+						filename = app.retrieveFilename("Filename to delete");
 						deleteFile(filename);	break;
 					case "3":
-						filename = app.userInput.getText("Search filename");
+						filename = app.retrieveFilename("Search filename");
 						searchFile(filename);	break;
 					case "r":
 						app.menuLevel=0; break;
@@ -70,6 +70,14 @@ public class LockedMeApp {
 		System.out.println("Application is finished.");
 		System.exit(0);
 
+	}
+
+	private String retrieveFilename(String prompt) {
+			String input = "";
+			while (!FileOp.checkFilename(input))
+				input = userInput.getText(prompt);
+
+			return input;
 	}
 
 	private static void searchFile(String filename) {
