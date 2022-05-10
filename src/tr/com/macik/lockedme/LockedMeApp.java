@@ -1,6 +1,11 @@
 package tr.com.macik.lockedme;
 
+import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +19,7 @@ public class LockedMeApp {
 	private static UserConsoleInput userInput = new UserConsoleInput();
 	private int screenWidth = 80;
 	private int menuLevel = 0;
+	private int currentLevel = -1;
 	private static FileOp file;
 	
 	
@@ -27,9 +33,9 @@ public class LockedMeApp {
 			try {
 				app.nl();
 				app.setMenu(app.menuLevel);
-				String choice = app.userInput.getChoice(app.menuMap);
+				String select = app.userInput.getSelect(app.menuMap);
 				if (app.menuLevel==0) {
-					switch (choice) {
+					switch (select) {
 					case "1":
 						reportFiles();	break;
 					case "2":
@@ -39,11 +45,11 @@ public class LockedMeApp {
 					default:
 						
 					}
-					if ("x".equals(choice))
+					if ("x".equals(select))
 						break;
 				} else if (app.menuLevel==2) {
 					String filename;
-					switch (choice) {
+					switch (select) {
 					case "1":
 						filename = app.retrieveFilename("New filename");
 						addFile(filename);	break;
@@ -60,6 +66,8 @@ public class LockedMeApp {
 					}
 					
 				}
+			} catch (RuntimeException e) {
+				System.out.println(e.getMessage());
 			} catch (Exception e) {
 				// Try to catch all exceptions if possible and 
 				// provide a message to the user
@@ -74,8 +82,11 @@ public class LockedMeApp {
 
 	private String retrieveFilename(String prompt) {
 			String input = "";
-			while (!FileOp.checkFilename(input))
+			while (!FileOp.checkFilename(input)) {
 				input = userInput.getText(prompt);
+				if ("".equals(input))
+					throw new RuntimeException("Current action canceled!");
+			}
 
 			return input;
 	}
@@ -135,33 +146,37 @@ public class LockedMeApp {
 	}
 
 	private static void reportFiles() {
-		// TODO Auto-generated method stub
+		File[] fList = new File(file.getDirectory()).listFiles();
 		System.out.println("Report files in ascending order.");
+		Arrays.sort(fList, new SortByFilename());
+		//Arrays.sort(fList);
+		for (File f : fList) {
+			Date yourDate = new Date(f.lastModified());
+			DateFormat formatter =  new SimpleDateFormat("dd-MM-yyyy hh-MM-ss");
+			String formattedDate = formatter.format(yourDate);
+			System.out.println(formattedDate + " " + f.getName());
+		}
 	}
 
-	/*private UserConsoleInput userInput() {
-		// TODO Auto-generated method stub
-		System.out.println("Eingabe? ");
-		
-	}*/
-
 	private void setMenu(int level) {
-		switch(level) {
-		case 0: 
+		if (currentLevel != level) {
 			menuMap.clear();
-			menuMap.put('1', "Report Files");
-			menuMap.put('2', "Business Operations");
-			menuMap.put('x', "Exit");
-			break;
-		case 2: 
-			menuMap.clear();
-			menuMap.put('1', "Add File");
-			menuMap.put('2', "Delete File");
-			menuMap.put('3', "Search File");
-			menuMap.put('r', "Return");
-			break;
-		default:
-			throw new RuntimeException("Menu not available!");
+			switch(level) {
+			case 0: 
+				menuMap.put('1', "Report Files");
+				menuMap.put('2', "Business Operations");
+				menuMap.put('x', "Exit");
+				break;
+			case 2: 
+				menuMap.put('1', "Add File");
+				menuMap.put('2', "Delete File");
+				menuMap.put('3', "Search File");
+				menuMap.put('r', "Return");
+				break;
+			default:
+				throw new RuntimeException("Menu not available!");
+			}
+			currentLevel = level;
 		}
 	}
 
@@ -214,4 +229,34 @@ public class LockedMeApp {
 		return new String(charArray);
 	}
 
+}
+
+class SortByFilename implements Comparator<File> {
+	@Override
+	public int compare(File aFile, File bFile) {
+		String aFilenameOrig = aFile.getName();
+		String aFilename = aFilenameOrig;
+		int aDotIndex = aFilename.indexOf('.');
+		if (aDotIndex==0)
+			aFilename = "";
+		else if (aDotIndex>0)
+			aFilename = aFilename.substring(0, aDotIndex);
+		else
+			aFilenameOrig += '.';
+
+		String bFilenameOrig = bFile.getName();
+		String bFilename = bFilenameOrig;
+		int bDotIndex = bFilename.indexOf('.');
+		if (bDotIndex==0)
+			bFilename = "";
+		else if (bDotIndex>0)
+			bFilename = bFilename.substring(0, bDotIndex);
+		else
+			bFilenameOrig += '.';
+		
+		int compareIndex = aFilename.compareTo(bFilename);
+		if (compareIndex == 0)
+			compareIndex = aFilenameOrig.compareTo(bFilenameOrig);
+		return compareIndex;
+	}
 }

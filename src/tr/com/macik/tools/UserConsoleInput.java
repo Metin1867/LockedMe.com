@@ -24,7 +24,7 @@ public class UserConsoleInput {
 			userInputMap.put(6, "Yes/No");
 			userInputMap.put(999, "Exit");
 			
-			int choice = new Integer(userInput.getChoice(userInputMap));
+			int choice = new Integer(userInput.getSelect(userInputMap));
 			System.out.println("Auswahl: >" + choice + "<");
 			
 			switch (choice) {
@@ -56,12 +56,12 @@ public class UserConsoleInput {
 	}
 
 	/**
-	 * Get a choice from a menu
+	 * Select from a list
 	 * 
-	 * @param	prompt	menu with items to choice in form of key/value
-	 * @return			selected menu key
+	 * @param	prompt	select list in form of key/value
+	 * @return			selected key
 	 */
-	public <K, V> String getChoice(HashMap<K, V> prompt) {
+	public <K, V> String getSelect(HashMap<K, V> prompt) {
 		for (Map.Entry<K,V> entry : prompt.entrySet()) {
 			  K key = entry.getKey();
 			  V value = entry.getValue();
@@ -75,13 +75,13 @@ public class UserConsoleInput {
 	/**
 	 * Get an item from a given list
 	 * 
-	 * @param	list	list of choices to select one
+	 * @param	list	list of selection
 	 * @return			the selected one from the list
 	 */
 	public String getFromList(Object[] list) {
 		String input = "";
 		while (!isInList(input, list))
-			input = getText("Choice");
+			input = getText("Select");
 		return input;
 	}
 
