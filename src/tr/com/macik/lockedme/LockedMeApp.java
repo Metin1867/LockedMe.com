@@ -1,26 +1,19 @@
 package tr.com.macik.lockedme;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 
-import tr.com.macik.tools.FileOp;
 import tr.com.macik.tools.Log;
-import tr.com.macik.tools.UserConsoleInput;
 
 public class LockedMeApp {
 	private HashMap<Character, String> menuMap = new LinkedHashMap<>();
-	private static UserConsoleInput userInput = new UserConsoleInput();
 	private int screenWidth = 80;
 	private int menuLevel = 0;
 	private int currentLevel = -1;
-	private static FileOp file;
+	// private static FileOp file;
 	
 	
 	public static void main(String[] args) {
@@ -28,16 +21,17 @@ public class LockedMeApp {
 		Log.debug = true;
 		LockedMeApp app = new LockedMeApp();
 		app.welcomeScreen();
-		file = new FileOp(directory);
+		// file = new FileOp(directory);
+		LockedMeActions.setDirectory(directory);
 		while(true) {
 			try {
 				app.nl();
 				app.setMenu(app.menuLevel);
-				String select = app.userInput.getSelect(app.menuMap);
+				String select = LockedMeActions.userInput.getSelect(app.menuMap);
 				if (app.menuLevel==0) {
 					switch (select) {
 					case "1":
-						reportFiles();	break;
+						LockedMeActions.reportFiles();	break;
 					case "2":
 						app.menuLevel = 2;	break;
 					case "x":
@@ -51,14 +45,14 @@ public class LockedMeApp {
 					String filename;
 					switch (select) {
 					case "1":
-						filename = app.retrieveFilename("New filename");
-						addFile(filename);	break;
+						filename = LockedMeActions.retrieveFilename("New filename");
+						LockedMeActions.addFile(filename);	break;
 					case "2":
-						filename = app.retrieveFilename("Filename to delete");
-						deleteFile(filename);	break;
+						filename = LockedMeActions.retrieveFilename("Filename to delete");
+						LockedMeActions.deleteFile(filename);	break;
 					case "3":
-						filename = app.retrieveFilename("Search filename");
-						searchFile(filename);	break;
+						filename = LockedMeActions.retrieveFilename("Search filename");
+						LockedMeActions.searchFile(filename);	break;
 					case "r":
 						app.menuLevel=0; break;
 					default:
@@ -78,84 +72,6 @@ public class LockedMeApp {
 		System.out.println("Application is finished.");
 		System.exit(0);
 
-	}
-
-	private String retrieveFilename(String prompt) {
-			String input = "";
-			while (!FileOp.checkFilename(input)) {
-				input = userInput.getText(prompt);
-				if ("".equals(input))
-					throw new RuntimeException("Current action canceled!");
-			}
-
-			return input;
-	}
-
-	private static void searchFile(String filename) {
-		System.out.println("Search a file with given file name.");
-		if (file.search(filename)) {
-			System.out.println("File found!");
-			boolean yes = userInput.getDecision("Do you will see the file content?");
-			if (yes) {
-				List<String> content = file.getContent(filename);
-				StringBuilder sb = new StringBuilder();
-				for(String line : content) {
-					if (!(line == null || "".equals(line) || "\n".equals(line))) {
-						sb.append(line);
-						sb.append('\n');
-					}
-				}
-				System.out.println("____________________________________________________________________________________________________");
-				System.out.print(sb);
-				System.out.println("____________________________________________________________________________________________________");
-			}
-		} else {
-			System.out.println("File not found!");			
-		};
-	}
-
-	private static void deleteFile(String filename) {
-		System.out.println("Delete a file with given file name.");
-		if (file.exist(filename)) {
-			boolean yes = userInput.getDecision("Are you sure?");
-			if (yes)
-				file.delete(filename);
-		} else {
-			System.out.println("Given file name doesn't exists.");			
-		}
-	}
-
-	private static void addFile(String filename) {
-		System.out.println("Add a file with given file name.");
-		if (!file.exist(filename))
-			file.touch(filename);
-		boolean yes = userInput.getDecision("Would you append some text?");
-		if (yes) {
-			StringBuilder sb = new StringBuilder();
-			String line="start";
-			while (true) {
-				line = userInput.getText("Line");
-				if (line.equals(""))
-					break;
-				sb.append(line);
-				sb.append('\n');
-			};
-			if (sb.length()>0)
-				file.append(filename, sb.toString());
-		}
-	}
-
-	private static void reportFiles() {
-		File[] fList = new File(file.getDirectory()).listFiles();
-		System.out.println("Report files in ascending order.");
-		Arrays.sort(fList, new SortByFilename());
-		//Arrays.sort(fList);
-		for (File f : fList) {
-			Date yourDate = new Date(f.lastModified());
-			DateFormat formatter =  new SimpleDateFormat("dd-MM-yyyy hh-MM-ss");
-			String formattedDate = formatter.format(yourDate);
-			System.out.println(formattedDate + " " + f.getName());
-		}
 	}
 
 	private void setMenu(int level) {
@@ -229,34 +145,4 @@ public class LockedMeApp {
 		return new String(charArray);
 	}
 
-}
-
-class SortByFilename implements Comparator<File> {
-	@Override
-	public int compare(File aFile, File bFile) {
-		String aFilenameOrig = aFile.getName();
-		String aFilename = aFilenameOrig;
-		int aDotIndex = aFilename.indexOf('.');
-		if (aDotIndex==0)
-			aFilename = "";
-		else if (aDotIndex>0)
-			aFilename = aFilename.substring(0, aDotIndex);
-		else
-			aFilenameOrig += '.';
-
-		String bFilenameOrig = bFile.getName();
-		String bFilename = bFilenameOrig;
-		int bDotIndex = bFilename.indexOf('.');
-		if (bDotIndex==0)
-			bFilename = "";
-		else if (bDotIndex>0)
-			bFilename = bFilename.substring(0, bDotIndex);
-		else
-			bFilenameOrig += '.';
-		
-		int compareIndex = aFilename.compareTo(bFilename);
-		if (compareIndex == 0)
-			compareIndex = aFilenameOrig.compareTo(bFilenameOrig);
-		return compareIndex;
-	}
 }
