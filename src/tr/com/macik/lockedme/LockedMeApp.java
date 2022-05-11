@@ -1,8 +1,6 @@
 package tr.com.macik.lockedme;
 
-import java.io.File;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -12,16 +10,13 @@ public class LockedMeApp {
 	private HashMap<Character, String> menuMap = new LinkedHashMap<>();
 	private int screenWidth = 80;
 	private int menuLevel = 0;
-	private int currentLevel = -1;
-	// private static FileOp file;
-	
+	private int currentLevel = -1;	
 	
 	public static void main(String[] args) {
 		String directory = "C:\\Dev\\workspace\\java\\LockedMe.com\\data";
 		Log.debug = true;
 		LockedMeApp app = new LockedMeApp();
 		app.welcomeScreen();
-		// file = new FileOp(directory);
 		LockedMeActions.setDirectory(directory);
 		while(true) {
 			try {
